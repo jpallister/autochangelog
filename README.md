@@ -10,6 +10,7 @@ If this file is placed as a prepare-commit-msg hook in git
 commit message will be formed and prepopulated.
 
 Example:
+
     james@computer% git commit
     Name: James Pallister
     Email: james.pallister@bristol.ac.uk
