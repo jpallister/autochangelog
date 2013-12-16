@@ -43,7 +43,7 @@ import sys
 print sys.argv
 arguments = docopt(__doc__)
 
-from subprocess import check_output
+from subprocess import check_output, check_call
 import os
 import readline
 import datetime
@@ -87,7 +87,7 @@ def choice(prompt, choices):
             sel = None
             for c in choices:
                 if c.isupper():
-                    return c
+                    return c.lower()
         elif sel.lower() in map(string.lower, choices):
             return sel.lower()
 
@@ -106,6 +106,12 @@ if __name__ == "__main__":
     email = check_output("git config user.email", shell=True).strip()
 
     sys.stdin = open('/dev/tty')
+
+    if "ChangeLog" in staged_files:
+        print "ChangeLog already staged for commit."
+        c = choice("Skip changelog+commit msg generation?", ["Y","n"])
+        if c == "y":
+            exit(0)
 
     name = get_input("Name: ", name)
     email = get_input("Email: ", email)
@@ -191,7 +197,7 @@ if __name__ == "__main__":
     f.write(entry + orig)
     f.close()
 
-    email = check_output("git add ChangeLog", shell=True).strip()
+    check_output("git add ChangeLog", shell=True)
 
     if arguments['COMMITFILE'] is not None:
         orig = open(arguments['COMMITFILE'], "r").read()
