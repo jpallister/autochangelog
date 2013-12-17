@@ -5,9 +5,9 @@ The script will query about each file to be committed, asking for a message to
 put in the ChangeLog/commit. This will be formatted and added to the ChangeLog
 in the specified directory.
 
-If this file is placed as a prepare-commit-msg hook in git
-(.git/hooks/prepare-commit-msg), upon a normal commit (non merge, amend), a
-commit message will be formed and prepopulated.
+This file should be sym-linked as both prepare-commit-msg and pre-commit, so 
+ChangeLog can be added into the commit. Upon a normal commit (non merge, 
+amend), a commit message will be formed and prepopulated.
 
 Example:
 

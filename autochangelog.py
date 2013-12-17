@@ -34,8 +34,9 @@ The script will query about each file to be committed, asking for a message to
 put in the ChangeLog/commit. This will be formatted and added to the ChangeLog
 in the specified directory.
 
-If this file is placed as a prepare-commit-msg hook in git, upon a normal
-commit (non merge, amend), a commit message will be formed and prepopulated.
+This file should be sym-linked as both prepare-commit-msg and pre-commit, so 
+ChangeLog can be added into the commit. Upon a normal commit (non merge, 
+amend), a commit message will be formed and prepopulated.
 
 """
 from docopt import docopt
@@ -51,6 +52,7 @@ import string
 import textwrap
 from sys import stdout
 import sys
+import hashlib
 
 try:
     from colorama import init, Fore
@@ -91,7 +93,7 @@ def choice(prompt, choices):
         elif sel.lower() in map(string.lower, choices):
             return sel.lower()
 
-if __name__ == "__main__":
+def pre_commit():
     if len(arguments['COMMITARGS']) > 0: # Not a normal commit
         exit(0)
 
@@ -199,9 +201,30 @@ if __name__ == "__main__":
 
     check_output("git add ChangeLog", shell=True)
 
-    if arguments['COMMITFILE'] is not None:
-        orig = open(arguments['COMMITFILE'], "r").read()
+    md5 = hashlib.md5()
+    md5.update(os.getcwd())
+    f = open("/tmp/tmpcommit."+md5.hexdigest(),"w")
+    f.write(commit)
+    f.close()
 
-        f = open(arguments['COMMITFILE'], "w")
-        f.write(commit + orig)
+def prepare_commit_msg():
+    orig = open(arguments['COMMITFILE'], "r").read()
+
+    md5 = hashlib.md5()
+    md5.update(os.getcwd())
+    if not os.path.exists("/tmp/tmpcommit."+md5.hexdigest()):
+        commit = ""
+    else:
+        f = open("/tmp/tmpcommit."+md5.hexdigest(),"r")
+        commit = f.read()
         f.close()
+
+    f = open(arguments['COMMITFILE'], "w")
+    f.write(commit + orig)
+    f.close()
+
+if __name__ == "__main__":
+    if arguments['COMMITFILE'] is None:
+        pre_commit()
+    else:
+        prepare_commit_msg()
