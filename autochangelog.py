@@ -215,6 +215,7 @@ def prepare_commit_msg():
         f = open("/tmp/tmpcommit."+md5.hexdigest(),"r")
         commit = f.read()
         f.close()
+        os.unlink("/tmp/tmpcommit."+md5.hexdigest())
 
     f = open(sys.argv[1], "w")
     f.write(commit + orig)
