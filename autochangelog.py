@@ -22,10 +22,9 @@
 """Script to automatically create change log entries from staged files.
 
 Usage:
-    autochangelog.py [options] [COMMITFILE] [COMMITARGS...]
+    autochangelog.py [COMMITFILE] [COMMITARGS...]
 
 Options:
-    --repo REPO         Directory of the repository [default: .]
     COMMITFILE          File to store commit message, doesn't save commit if
                         not specified
 
@@ -37,12 +36,10 @@ in the specified directory.
 This file should be sym-linked as both prepare-commit-msg and pre-commit, so 
 ChangeLog can be added into the commit. Upon a normal commit (non merge, 
 amend), a commit message will be formed and prepopulated.
-
 """
-from docopt import docopt
+
 import sys
 print sys.argv
-arguments = docopt(__doc__)
 
 from subprocess import check_output, check_call
 import os
@@ -94,13 +91,13 @@ def choice(prompt, choices):
             return sel.lower()
 
 def pre_commit():
-    if len(arguments['COMMITARGS']) > 0: # Not a normal commit
+    if len(sys.argv) > 2: # Not a normal commit
         exit(0)
 
     # Get a list of cached files, plus our name and email
-    os.chdir(arguments['--repo'])
+    # os.chdir(arguments['--repo'])
     if not os.path.exists("ChangeLog"):
-        print "Cannot find ChangeLog in", arguments['--repo']
+        print "Cannot find ChangeLog."
         exit(1)
 
     staged_files = check_output("git diff --name-only --cached", shell=True).split()
@@ -208,7 +205,7 @@ def pre_commit():
     f.close()
 
 def prepare_commit_msg():
-    orig = open(arguments['COMMITFILE'], "r").read()
+    orig = open(sys.argv[1], "r").read()
 
     md5 = hashlib.md5()
     md5.update(os.getcwd())
@@ -219,12 +216,12 @@ def prepare_commit_msg():
         commit = f.read()
         f.close()
 
-    f = open(arguments['COMMITFILE'], "w")
+    f = open(sys.argv[1], "w")
     f.write(commit + orig)
     f.close()
 
 if __name__ == "__main__":
-    if arguments['COMMITFILE'] is None:
+    if len(sys.argv) == 1:
         pre_commit()
     else:
         prepare_commit_msg()
