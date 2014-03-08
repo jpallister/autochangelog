@@ -157,9 +157,10 @@ def pre_commit():
             initial = ""
 
         i = get_input("Enter a description of the changes for {}.\n > ".format(f), initial)
-
-        if i == "":
-            i = "-"
+        while True:
+            if i != "":
+                break
+            i = get_input(" > ".format(f), initial)
 
         emsg = textwrap.wrap(i, 66-len(f))
         cmsg = textwrap.wrap(i, 64-len(f))
